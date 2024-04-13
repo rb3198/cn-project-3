@@ -1,0 +1,18 @@
+{
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/Project 3.csproj"
+            ],
+            "type": "process",
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

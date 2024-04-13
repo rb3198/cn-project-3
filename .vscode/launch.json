@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Alice",
+            "type": "coreclr",
+            "request": "launch",
+            "args": ["Alice", "8001"],
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net7.0/Project 3.dll",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Bob",
+            "type": "coreclr",
+            "request": "launch",
+            "args": ["Bob", "8003"],
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net7.0/Project 3.dll",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        }
+    ]
+}
