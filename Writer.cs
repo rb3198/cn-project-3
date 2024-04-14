@@ -23,6 +23,12 @@ namespace ChatApp
                 StreamWriter writer = new(stream, Encoding.ASCII);
                 writer.WriteLine(message);
                 writer.Flush();
+                if (message.StartsWith("transfer"))
+                {
+                    Console.WriteLine($"Received command {message}");
+                    string pathName = message.Split(" ")[1];
+                    WriteFileToNetworkStream(pathName);
+                }
             }
             catch (IOException ex)
             {
@@ -42,6 +48,26 @@ namespace ChatApp
             {
                 throw;
             }
+        }
+
+        private void WriteFileToNetworkStream(string pathName)
+        {
+            NetworkStream dataStream = _client.GetStream();
+            FileStream fs = new(pathName, FileMode.Open, FileAccess.Read);
+            byte[] buffer = new byte[1024];
+            long total = 0;
+            int count;
+            while ((count = fs.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                dataStream.Write(buffer, 0, count);
+                dataStream.Flush();
+                total += count;
+            }
+            // dataStream.Close();
+            fs.Close();
+            dataStream.Write(Encoding.ASCII.GetBytes("EOF"));
+            dataStream.Flush();
+            // dataStream.Dispose();
         }
 
         public void Close()
