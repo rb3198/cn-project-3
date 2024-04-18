@@ -43,7 +43,7 @@
             {
                 Environment.Exit(0);
             }
-            app.InitializeWriter(writePort);
+            app.InitializeWriter(writePort, appName);
             app.BeginWriting();
             exitEvent.WaitOne();
             Console.WriteLine("Safely terminating all the connections");

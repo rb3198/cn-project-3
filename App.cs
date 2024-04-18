@@ -17,9 +17,9 @@ namespace ChatApp
             BeginAcceptingClients();
         }
 
-        public void InitializeWriter(int writePort)
+        public void InitializeWriter(int writePort, string appName)
         {
-            _writer = new Writer(writePort);
+            _writer = new Writer(writePort, appName);
         }
 
         private void BeginAcceptingClients()

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace ChatApp
 {
@@ -8,14 +9,27 @@ namespace ChatApp
     {
         private readonly TcpClient _client;
         private Action? _onClose;
-        private bool _readingFile = false;
-        private string? _fileName;
+        private string _remoteName = "remote";
         public Reader(TcpClient client)
         {
             _client = client;
             Console.WriteLine($"Connected to {client.Client.RemoteEndPoint?.ToString() ?? "unknown"}");
+            GetRemoteNameFromDirectory();
         }
 
+        private void GetRemoteNameFromDirectory()
+        {
+            Thread.Sleep(500);
+            string jsonResult = File.ReadAllText("nameDirectory.json");
+            Dictionary<string, string>? portNameMapping = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonResult);
+            string writerEndPoint = _client.Client?.RemoteEndPoint?.ToString() ?? string.Empty;
+            if (portNameMapping == null || string.IsNullOrEmpty(writerEndPoint) || !portNameMapping.ContainsKey(writerEndPoint))
+            {
+                Console.WriteLine("Could not get remote host name from the records. Defaulting to 'remote'.");
+                return;
+            }
+            _remoteName = portNameMapping[writerEndPoint];
+        }
         public void OnClose(Action onClose)
         {
             _onClose = onClose;
@@ -30,7 +44,7 @@ namespace ChatApp
                 string? line;
                 while (!string.IsNullOrEmpty(line = reader.ReadLine()))
                 {
-                    Console.WriteLine($"Remote: {line}");
+                    Console.WriteLine($"{_remoteName}: {line}");
                     if (line.StartsWith("transfer"))
                     {
                         ReadFile(line.Split(" ")[1], stream);
@@ -67,26 +81,17 @@ namespace ChatApp
             int count;
             while ((count = dataStream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                string bufStr = Encoding.ASCII.GetString(buffer);
-                if (bufStr.StartsWith("EOF"))
-                {
-                    // var buf = bufStr.Substring(3);
-                    // fs.Write(Encoding.ASCII.GetBytes(buf), 0, count);
-                    // fs.Flush();
-                    break;
-                }
                 fs.Write(buffer, 0, count);
                 fs.Flush();
             }
             Console.WriteLine("Completed file storage.");
-            // fs.Flush();
             fs.Close();
         }
 
         public void CloseConnection()
         {
-            _client.Client.Close();
-            _client.Client.Dispose();
+            _client.Client?.Close();
+            _client.Client?.Dispose();
             _client.Dispose();
             _client.Close();
             _onClose?.Invoke();
